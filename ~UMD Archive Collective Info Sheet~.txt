@@ -1,0 +1,38 @@
+~UMD Archive Collective Info Sheet~ 
+~~ Anything after the : is where your information goes ~~
+
+Logical Metadata:
+	Release Title:
+	Type of UMD from Cover (Video, Music, or Music Video):
+	Dumper (your username):
+	Advertised Region:
+	Country/Region of Release:
+	Catalog/Serial Number:
+	Barcode:
+	Distributor:
+	Secondary Company:
+	Advertised Languages (English, French, etc.):
+	Advertised Subtitles (English, French, etc.):
+	Special Features:
+	Advertised Aspect Ratio:
+	Number of Discs:
+	Is this a loose disc? (yes or no):
+	Misc. Comments:
+
+Physical Metadata:
+	Outer Ring Mastering Code:
+	Outer Ring Mastering SID Code:
+	Outer Ring Toolstamp:
+	Inner Ring Mastering Code:
+	Inner Ring Mastering SID Code:
+	Inner Ring Toolstamp:
+	Data Side Mould SID Code:
+
+	CRC32:
+	MD5:
+	SHA1:
+	Size (in bytes):
+
+PSP Information:
+	Method of Dumping (USB or name of app used):
+	PSP Model/CFW Used:
