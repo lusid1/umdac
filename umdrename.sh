@@ -1,22 +1,22 @@
 #!/bin/bash
 
 iso=$1
+echo "Processing: $iso"
 
+UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
+UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
+UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
 
-UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | strings -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
-UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | strings -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
-UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | strings -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
 
 filename=$(basename "$iso")
 filepath=$(dirname "$iso")
 
 # The longest title is probably the right one
 TITLE="$UMD_VIDEO"
-if [ ${#UMD_DATA} -gt ${#TITLE} ]; then TITLE="$UMD_DATA"; fi
+#if [ ${#UMD_DATA} -gt ${#TITLE} ]; then TITLE="$UMD_DATA"; fi
 if [ ${#UMD_AUDIO} -gt ${#TITLE} ]; then TITLE="$UMD_AUDIO"; fi
 
 AUDIO_TRACKS=$(umd2mkv -iso "$iso" -inspect | grep Audio | cut -d':' -f2 )
-#Langs=$(echo $AUDIO_TRACKS | tr '=' ' ' | cut -d' ' -f2,5 | tr ' ' ',' | sed 's/.*/(&)/') 
 Langs=$(
     echo "$AUDIO_TRACKS" \
     | sed 's/, /\n/g' \
@@ -26,14 +26,36 @@ Langs=$(
     | sed 's/,$//' \
     | sed 's/.*/(&)/'
 )
-echo "Processing $iso"
+
 CRC32=$(crc32 "$iso" |cut -f1) 
-#suggested_name="$(echo "$TITLE" | sed 's/[^A-Za-z0-9 _-()]//g' | sed 's/[[:space:]]*$//') $Langs[$CRC32].iso"
-suggested_name="$(
-    echo "$TITLE" \
-    | sed 's/[^A-Za-z0-9 _\-\(\)]//g' \
-    | sed 's/[[:space:]]*$//'
-) $Langs[$CRC32].iso"
+
+# Remove unsafe utf-8 filename character 
+export LC_ALL=C.UTF-8
+TITLESAFE="$(echo "$TITLE" | tr -d '\r' | awk '
+BEGIN {
+    # Define forbidden filesystem/shell characters as a regex pattern
+    forbidden = "[/\\\\?%*:|\"<>!@#$&*`~;]"
+}
+{
+    # Replace forbidden punctuation with a space
+    gsub(forbidden, " ")
+    
+    # Strip any hidden control characters safely
+    gsub(/[[:cntrl:]]/, "")
+    
+    # Collapse multiple spaces into a single space
+    gsub(/  */, " ")
+    
+    # Remove leading spaces
+    gsub(/^ */, "")
+    
+    # Remove trailing spaces
+    gsub(/ *$/, "")
+    
+    print
+}')"
+
+suggested_name="${TITLESAFE} $Langs[$CRC32].iso"
 
 if [ -f "$filepath/$suggested_name" ]; then
     echo "File $suggested_name already exists, skipping rename"
