@@ -63,6 +63,7 @@ if [ -f "$filepath/$suggested_name" ]; then
     mv "$iso" "$filepath/duplicates/$filename"
     exit 1
 fi
-echo "old name..: $filename"
-echo "new name..: $suggested_name"
+#echo "old name..: $filename"
+#echo "new name..: $suggested_name"
+echo "Renaming..: $filepath/$suggested_name"
 mv "$iso" "$filepath/$suggested_name"

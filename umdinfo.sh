@@ -65,8 +65,8 @@ echo "UMD_VIDEO Title: $UMD_VIDEO"
 echo "UMD_AUDIO Title: $UMD_AUDIO"
 echo "Audio Tracks...:" $AUDIO_TRACKS
 echo "Subtitles......:" $(umd2mkv -iso "$iso" -inspect | grep Subtitle | cut -d':' -f2 | paste -sd, -) 
-#echo "CRC32..........:" $CRC32 
-#echo "MD5............:" $(md5sum "$iso" | awk '{ print $1 }') 
-#echo "SHA1...........:" $(sha1sum "$iso" | awk '{ print $1 }') 
+echo "CRC32..........:" $CRC32 
+echo "MD5............:" $(md5sum "$iso" | awk '{ print $1 }') 
+echo "SHA1...........:" $(sha1sum "$iso" | awk '{ print $1 }') 
 echo "Size in bytes..:" $(wc -c < "$iso") 
 echo ""
