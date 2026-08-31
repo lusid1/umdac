@@ -1,7 +1,7 @@
 #!/bin/bash
 
 iso=$1
-echo "Processing: $iso"
+echo "Checking..: $iso"
 
 UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
 UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
@@ -27,7 +27,7 @@ Langs=$(
     | sed 's/.*/(&)/'
 )
 
-CRC32=$(crc32 "$iso" |cut -f1) 
+#CRC32=$(crc32 "$iso" |cut -f1) 
 
 # Remove unsafe utf-8 filename character 
 export LC_ALL=C.UTF-8
@@ -55,14 +55,9 @@ BEGIN {
     print
 }')"
 
-suggested_name="${TITLESAFE} $Langs[$CRC32].iso"
+suggested_name="${TITLESAFE} $Langs"
 
-if [ -f "$filepath/$suggested_name" ]; then
-    echo "File $suggested_name already exists, moving to duplicates folder."
-    mkdir -p "$filepath/duplicates"
-    mv "$iso" "$filepath/duplicates/$filename"
-    exit 1
+if [[ "$filename" != "$suggested_name"* ]]; then
+  ./umdrename.sh "$iso"  
 fi
-echo "old name..: $filename"
-echo "new name..: $suggested_name"
-mv "$iso" "$filepath/$suggested_name"
+
