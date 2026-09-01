@@ -26,7 +26,7 @@ Langs=$(
     | sed 's/.*/(&)/'
 )
 
-#CRC32=$(crc32 "$iso" |cut -f1) 
+CRC32=$(crc32 "$iso" |cut -f1) 
 
 # Remove unsafe utf-8 filename character 
 export LC_ALL=C.UTF-8

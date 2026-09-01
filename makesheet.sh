@@ -14,7 +14,8 @@ UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO | strings | tail -n 1)
 UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO | strings | tail -n 1)
 
 # The longest title is probably the right one
-TITLE="$UMD_DATA"
+#TITLE="$UMD_DATA"
+TITLE=""
 if [ ${#UMD_VIDEO} -gt ${#TITLE} ]; then TITLE="$UMD_VIDEO"; fi
 if [ ${#UMD_AUDIO} -gt ${#TITLE} ]; then TITLE="$UMD_AUDIO"; fi
 

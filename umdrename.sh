@@ -2,7 +2,7 @@
 shopt -s nullglob
 
 iso=$1
-echo "Processing: $iso"
+echo "Checking..: $iso"
 
 UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
 UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
@@ -11,6 +11,17 @@ UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | strings -eS 
 
 filename=$(basename "$iso")
 filepath=$(dirname "$iso")
+
+if [[ $2 == "-copy2dir="* ]]; then
+    dstpath="${2#-copy2dir=}"
+fi
+if [[ $2 == "-move2dir="* ]]; then
+    dstpath="${2#-move2dir=}"
+fi
+if [[ -z "$dstpath" ]]; then
+    dstpath="$filepath"
+fi
+mkdir -p "$dstpath"
 
 # The longest title is probably the right one
 TITLE="$UMD_VIDEO"
@@ -57,7 +68,7 @@ BEGIN {
 # Get or calc CRC32 checksum of the ISO file
 if [[ $iso =~ [\[\(]([a-fA-F0-9]{8})[\]\)]\.[iI][sS][oO]$ ]]; then
         CRC32="${BASH_REMATCH[1]}"
-    else
+else
         CRC32=$(crc32 "$iso" | cut -f1)
 fi
 CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
@@ -70,21 +81,50 @@ fi
 
 suggested_name="${TITLESAFE} $Langs $SERIAL[$CRC32].iso"
 
-# Double rename if case insensitive file system has a conflict with the new name
-if [ -f "$filepath/$suggested_name" ]; then
-    mv "$iso" "$filepath/_$suggested_name"
-    # Check again for duplicate after first rename
-    if [ -f "$filepath/$suggested_name" ]; then
-        mkdir -p "$filepath/duplicates"
-        echo "Duplicate found, moving $filename to duplicates folder"
-        mv "$filepath/_$suggested_name" "$filepath/duplicates/$filename"
-    else
-        echo "Renaming $filename to $suggested_name"
-        mv "$filepath/_$suggested_name" "$filepath/$suggested_name"
-    fi
-    exit 1
+#If everything checks out we are done
+if [[ "$iso" == "$dstpath/$suggested_name" ]]; then
+    exit 0
 fi
-#echo "old name..: $filename"
-#echo "new name..: $suggested_name"
-echo "Renaming..: $filepath/$suggested_name"
-mv "$iso" "$filepath/$suggested_name"
+
+# If we are in copy mode, start with the copy
+if [[ $2 == "-copy2dir="* ]]; then
+    if [ -f "$dstpath/$suggested_name" ]; then 
+        echo "Found.....: $dstpath/$suggested_name"
+        exit 0; 
+    fi
+
+    echo "Copying...: $dstpath/$suggested_name"
+    cp "$iso" "$dstpath/$suggested_name"
+    iso="$dstpath/$suggested_name"
+fi
+
+# If rename is not required we are done
+if [[ "$iso" == "$dstpath/$suggested_name" ]]; then
+    exit 0
+fi
+
+verbiage="Renaming..:"
+if [[ $2 == "-move2dir="* ]]; then
+    verbiage="Moving....:"
+fi
+
+# Double rename if case insensitive file system has a conflict with the new name
+if [ -f "$dstpath/$suggested_name" ]; then
+    mv "$iso" "$dstpath/_$suggested_name"
+    # Check again for duplicate after first rename
+    if [ -f "$dstpath/$suggested_name" ]; then
+        mkdir -p "$dstpath/duplicates"
+        echo "Duplicate.: $dstpath/$suggested_name"
+        mv "$dstpath/_$suggested_name" "$dstpath/duplicates/$filename"
+    else
+        echo "$verbiage $dstpath/$suggested_name"
+        mv "$dstpath/_$suggested_name" "$dstpath/$suggested_name"
+    fi
+    exit 0
+else
+    echo "$verbiage $dstpath/$suggested_name"
+    mv "$iso" "$dstpath/$suggested_name"
+fi
+
+
+

@@ -1,14 +1,15 @@
 #!/bin/bash
 
-DIR="$1"
-#DIR="/mnt/h/ISO/VIDEO"  # Replace with your directory path
-#REGEX='^\[.*'  # Example: [GAME]_0001.iso
-#REGEX='.*\.iso$'  # Example: *.iso
-REGEX='.*\.[iI][sS][oO]$' 
+# Validate input argument
+DIR="${1:-.}"
+if [[ ! -d "$DIR" ]]; then
+    echo "Error: '$DIR' is not a valid directory."
+    exit 1
+fi
 
-for file in "$DIR"/*; do
-    if [[ -f "$file" && $(basename "$file") =~ $REGEX ]]; then
-        #./umdrename.sh "$file"
-        ./umdrename2.sh "$file"
-    fi
+# Find all iso files recursively
+# Using -print0 separates filenames with a null byte
+find "$DIR" -type f -iname "*.iso" -print0 | while IFS= read -r -d '' file; do
+    # Call the umdrename2.sh script for each file
+    ./umdrename.sh "$file" "$2"
 done
