@@ -55,9 +55,23 @@ BEGIN {
     print
 }')"
 
-suggested_name="${TITLESAFE} $Langs"
+# Get or calc CRC32 checksum of the ISO file
+if [[ $iso =~ [\[\(]([a-fA-F0-9]{8})[\]\)]\.[iI][sS][oO]$ ]]; then
+        CRC32="${BASH_REMATCH[1]}"
+    else
+        CRC32=$(crc32 "$iso" | cut -f1)
+fi
+CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
 
-if [[ "$filename" != "$suggested_name"* ]]; then
+# For non-ascii titles, add the serial number to the filename
+ASCITITLE="${TITLESAFE//[^[:ascii:]]/}"
+if [[ "$ASCITITLE" != "$TITLESAFE" ]]; then
+    SERIAL="[$UMD_DATA] "
+fi
+
+suggested_name="${TITLESAFE} $Langs $SERIAL[$CRC32].iso"
+
+if [[ "$filename" != "$suggested_name" ]]; then
   ./umdrename.sh "$iso"  
 fi
 

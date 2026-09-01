@@ -1,4 +1,5 @@
 #!/bin/bash
+shopt -s nullglob
 
 iso=$1
 echo "Processing: $iso"
@@ -27,8 +28,6 @@ Langs=$(
     | sed 's/.*/(&)/'
 )
 
-CRC32=$(crc32 "$iso" |cut -f1) 
-
 # Remove unsafe utf-8 filename character 
 export LC_ALL=C.UTF-8
 TITLESAFE="$(echo "$TITLE" | tr -d '\r' | awk '
@@ -55,12 +54,34 @@ BEGIN {
     print
 }')"
 
-suggested_name="${TITLESAFE} $Langs[$CRC32].iso"
+# Get or calc CRC32 checksum of the ISO file
+if [[ $iso =~ [\[\(]([a-fA-F0-9]{8})[\]\)]\.[iI][sS][oO]$ ]]; then
+        CRC32="${BASH_REMATCH[1]}"
+    else
+        CRC32=$(crc32 "$iso" | cut -f1)
+fi
+CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
 
+# For non-ascii titles, add the serial number to the filename
+ASCITITLE="${TITLESAFE//[^[:ascii:]]/}"
+if [[ "$ASCITITLE" != "$TITLESAFE" ]]; then
+    SERIAL="[$UMD_DATA] "
+fi
+
+suggested_name="${TITLESAFE} $Langs $SERIAL[$CRC32].iso"
+
+# Double rename if case insensitive file system has a conflict with the new name
 if [ -f "$filepath/$suggested_name" ]; then
-    echo "File $suggested_name already exists, moving to duplicates folder."
-    mkdir -p "$filepath/duplicates"
-    mv "$iso" "$filepath/duplicates/$filename"
+    mv "$iso" "$filepath/_$suggested_name"
+    # Check again for duplicate after first rename
+    if [ -f "$filepath/$suggested_name" ]; then
+        mkdir -p "$filepath/duplicates"
+        echo "Duplicate found, moving $filename to duplicates folder"
+        mv "$filepath/_$suggested_name" "$filepath/duplicates/$filename"
+    else
+        echo "Renaming $filename to $suggested_name"
+        mv "$filepath/_$suggested_name" "$filepath/$suggested_name"
+    fi
     exit 1
 fi
 #echo "old name..: $filename"
