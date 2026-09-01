@@ -24,7 +24,7 @@ Example:
 ./umdinfo.sh "/mnt/f/UMDVIdeo (En)/Alien (Canadian).ISO"
 
 File Name......: Alien (Canadian).ISO
-Suggested Name.: Alien (eng,fra)[86bbe4d1].iso
+Suggested Name.: Alien (eng,fra) [86bbe4d1].iso
 UMD_DATA Title.: Alien
 UMD_VIDEO Title: Alien
 UMD_AUDIO Title: 

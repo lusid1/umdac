@@ -26,7 +26,7 @@ Langs=$(
     | sed 's/.*/(&)/'
 )
 
-CRC32=$(crc32 "$iso" |cut -f1) 
+#CRC32=$(crc32 "$iso" |cut -f1) 
 
 # Remove unsafe utf-8 filename character 
 export LC_ALL=C.UTF-8
@@ -54,13 +54,21 @@ BEGIN {
     print
 }')"
 
+# Get or calc CRC32 checksum of the ISO file
+#if [[ $iso =~ [\[\(]([a-fA-F0-9]{8})[\]\)]\.[iI][sS][oO]$ ]]; then
+#        CRC32="${BASH_REMATCH[1]}"
+#else
+        CRC32=$(crc32 "$iso" | cut -f1)
+#fi
+CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
+
 # For non-ascii titles, add the serial number to the filename
 ASCITITLE="${TITLESAFE//[^[:ascii:]]/}"
 if [[ "$ASCITITLE" != "$TITLESAFE" ]]; then
-    SERIAL=" [$UMD_DATA] "
+    SERIAL="[$UMD_DATA] "
 fi
 
-suggested_name="${TITLESAFE} $Langs$SERIAL[$CRC32].iso"
+suggested_name="${TITLESAFE} $Langs $SERIAL[$CRC32].iso"
 
 echo ""
 echo "File Name......: $filename"
