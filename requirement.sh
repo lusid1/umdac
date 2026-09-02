@@ -1,5 +1,6 @@
 OS=$(uname -s)
 
+# Enterprise Linux derivitives
 if [ -f /etc/redhat-release ]; then
     echo "Release: $(cat /etc/redhat-release)"
     sudo dnf install -y epel-release
@@ -9,10 +10,12 @@ if [ -f /etc/redhat-release ]; then
     sudo dnf install -y genisoimage
     sudo dnf install -y golang
     sudo dnf install -y git
+
+    # Check and install umd2mkv
     umd2mkv=$(which umd2mkv)
     if [ -z "$umd2mkv" ]; then
         echo "Installing umd2mkv..."
-        git clone https://github.com/umd2mkv/umd2mkv.git
+        git clone https://github.com/kacboy/umd2mkv.git
         cd umd2mkv
         go build ./cmd/umd2mkv
         sudo cp umd2mkv /usr/local/bin/
@@ -20,6 +23,30 @@ if [ -f /etc/redhat-release ]; then
         cd ..
     fi
 
+fi
+
+# Debian/Ubuntu derivitives
+if [ -f /etc/debian_version ]; then
+    echo "Release: Ubuntu/Debian ($(cat /etc/debian_version))"
+    sudo apt-get update -y
+    sudo apt-get install -y coreutils             
+    sudo apt-get install -y libarchive-zip-perl
+    sudo apt-get install -y ffmpeg
+    sudo apt-get install -y genisoimage
+    sudo apt-get install -y golang
+    sudo apt-get install -y git
+
+    # Check and install umd2mkv
+    umd2mkv=$(which umd2mkv)
+    if [ -z "$umd2mkv" ]; then
+        echo "Installing umd2mkv..."
+        git clone https://github.com/kacboy/umd2mkv.git
+        cd umd2mkv
+        go build ./cmd/umd2mkv
+        sudo cp umd2mkv /usr/local/bin/
+        sudo cp umd2mkv /usr/bin/
+        cd ..
+    fi
 fi
 
 echo "OS.....: $OS"
