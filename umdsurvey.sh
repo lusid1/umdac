@@ -1,4 +1,5 @@
 #!/bin/bash
+shopt -s nullglob
 
 # Validate input argument
 DIR="${1:-.}"
@@ -75,6 +76,7 @@ fi
 CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
 
 # For non-ascii titles, add the serial number to the filename
+SERIAL=""
 ASCITITLE="${TITLESAFE//[^[:ascii:]]/}"
 if [[ "$ASCITITLE" != "$TITLESAFE" ]]; then
     SERIAL="[$UMD_DATA] "
