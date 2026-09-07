@@ -4,9 +4,14 @@ shopt -s nullglob
 iso=$1
 echo "Checking..: $iso"
 
-UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
-UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
-UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
+strings=$(which strings)
+if [ "$(uname -s)" = "Darwin" ];then
+    strings=$(which gstrings)
+fi
+
+UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | $strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
+UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
+UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
 
 
 filename=$(basename "$iso")

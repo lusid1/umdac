@@ -9,9 +9,14 @@ txtfile="$(basename "$txtfile" .ISO)"
 txtfile="$txtfile.txt"
 touch "$txtfile"
 
-UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN | strings | cut -d'|' -f1)
-UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO | strings | tail -n 1)
-UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO | strings | tail -n 1)
+strings=$(which strings)
+if [ "$(uname -s)" = "Darwin" ];then
+    strings=$(which gstrings)
+fi
+
+UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | $strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
+UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
+UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
 
 # The longest title is probably the right one
 #TITLE="$UMD_DATA"

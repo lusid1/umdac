@@ -49,6 +49,17 @@ if [ -f /etc/debian_version ]; then
     fi
 fi
 
+# MacOS variants
+if [ "$(uname -s)" = "Darwin" ];then
+    strings=$(which gstrings)
+    if [ "-z "$strings" ]; then
+        echo "Installing gstrings..."
+        brew install binutils
+        echo 'export PATH="/opt/homebrew/opt/binutils/bin:$PATH"' >> ~/.zshrc
+        export PATH="/opt/homebrew/opt/binutils/bin:$PATH"'
+    fi
+fi
+
 echo "OS.....: $OS"
 echo "ifoinfo: $(which isoinfo)"
 echo "ffmpeg.: $(which ffmpeg)"
