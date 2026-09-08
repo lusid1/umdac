@@ -34,10 +34,26 @@ if [[ -z "$dstpath" ]]; then
 fi
 mkdir -p "$dstpath"
 
+# Get or calc CRC32 checksum of the ISO file
+if [[ $iso =~ [\[\(]([a-fA-F0-9]{8})[\]\)]\.[iI][sS][oO]$ ]]; then
+        CRC32="${BASH_REMATCH[1]}"
+else
+        CRC32=$(crc32 "$iso" | cut -f1)
+fi
+CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
+
 # The longest title is probably the right one
 TITLE="$UMD_VIDEO"
 #if [ ${#UMD_DATA} -gt ${#TITLE} ]; then TITLE="$UMD_DATA"; fi
 if [ ${#UMD_AUDIO} -gt ${#TITLE} ]; then TITLE="$UMD_AUDIO"; fi
+
+# If there is a title in the database, use it instead of the UMD_VIDEO title
+if [ -f "titles.tsv" ]; then
+    DB_TITLE=$(grep -iF "$CRC32" titles.tsv | grep "$UMD_DATA" | cut -f3)
+    if [ -n "$DB_TITLE" ]; then
+        TITLE="$DB_TITLE"
+    fi
+fi
 
 AUDIO_TRACKS=$(umd2mkv -iso "$iso" -inspect | grep Audio | cut -d':' -f2 )
 Langs=$(
@@ -75,14 +91,6 @@ BEGIN {
     
     print
 }')"
-
-# Get or calc CRC32 checksum of the ISO file
-if [[ $iso =~ [\[\(]([a-fA-F0-9]{8})[\]\)]\.[iI][sS][oO]$ ]]; then
-        CRC32="${BASH_REMATCH[1]}"
-else
-        CRC32=$(crc32 "$iso" | cut -f1)
-fi
-CRC32=$(echo "$CRC32" | tr '[:lower:]' '[:upper:]')
 
 # For non-ascii titles, add the serial number to the filename
 ASCITITLE="${TITLESAFE//[^[:ascii:]]/}"
