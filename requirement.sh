@@ -52,11 +52,18 @@ fi
 # MacOS variants
 if [ "$(uname -s)" = "Darwin" ];then
     strings=$(which gstrings)
-    if [ "-z "$strings" ]; then
+    if [ -z "$strings" ]; then
         echo "Installing gstrings..."
         brew install binutils
         echo 'export PATH="/opt/homebrew/opt/binutils/bin:$PATH"' >> ~/.zshrc
-        export PATH="/opt/homebrew/opt/binutils/bin:$PATH"'
+        export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
+    fi
+    awk=$(which gawk)
+    if [ -z "$awk" ]; then
+        echo "Installing gawk..."
+        brew install gawk
+        echo 'export PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"' >> ~/.zshrc
+        export PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"
     fi
 fi
 

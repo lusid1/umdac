@@ -20,6 +20,11 @@ if [ "$(uname -s)" = "Darwin" ];then
     strings=$(which gstrings)
 fi
 
+awk=$(which awk)
+if [ "$(uname -s)" = "Darwin" ];then
+    awk=$(which gawk)
+fi
+
 UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | $strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
 UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
 UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
@@ -47,7 +52,7 @@ Langs=$(
 
 # Remove unsafe utf-8 filename character 
 export LC_ALL=C.UTF-8
-TITLESAFE="$(echo "$TITLE" | tr -d '\r' | awk '
+TITLESAFE="$(echo "$TITLE" | tr -d '\r' | $awk '
 BEGIN {
     # Define forbidden filesystem/shell characters as a regex pattern
     forbidden = "[/\\\\?%*:|\"<>!@#$&*`~;]"
