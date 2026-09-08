@@ -15,10 +15,14 @@ rm umdindex.tsv 2>/dev/null
 # Using -print0 separates filenames with a null byte
 find "$DIR" -type f -iname "*.iso" -print0 | while IFS= read -r -d '' iso; do
 
-UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
-UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
-UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
+strings=$(which strings)
+if [ "$(uname -s)" = "Darwin" ];then
+    strings=$(which gstrings)
+fi
 
+UMD_DATA=$(isoinfo -i "$iso" -x /UMD_DATA.BIN 2>/dev/null | $strings -eS -n 1| cut -d'|' -f1 | sed 's/[[:space:]]*$//')
+UMD_VIDEO=$(isoinfo -i "$iso" -x /UMD_VIDEO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
+UMD_AUDIO=$(isoinfo -i "$iso" -x /UMD_AUDIO/PARAM.SFO 2>/dev/null | $strings -eS -n 1| tail -n 1 | sed 's/[[:space:]]*$//' )
 
 filename=$(basename "$iso")
 filepath=$(dirname "$iso")
