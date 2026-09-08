@@ -3,6 +3,7 @@ dumper="lusid1"
 method="USB"
 rig="PSP 1000 / ARK-5"
 
+
 iso=$1
 txtfile="$(basename "$iso" .iso)"
 txtfile="$(basename "$txtfile" .ISO)"
